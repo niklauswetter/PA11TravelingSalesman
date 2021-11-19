@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class PA11Main
 {
-
     public static void main(String[] args) throws FileNotFoundException {
 	    File file = new File(args[0]);
         Scanner scanner = new Scanner(file);
@@ -12,6 +11,19 @@ public class PA11Main
 
         loadMatrix(scanner,graph);
         System.out.println(graph);
+
+        int testSize = 11;
+        for(int i = 1;i<=testSize;i++)
+        {
+            for(int j = testSize;j>0;j--)
+            {
+                if(i==j)
+                    continue;
+                String v1 = String.valueOf(i);
+                String v2 = String.valueOf(j);
+                System.out.println("Vertices "+i+", "+j+" are adjacent: "+graph.isAdjacent(graph.getVertexIfPresent(v1),graph.getVertexIfPresent(v2)));
+            }
+        }
     }
 
     public static void loadMatrix(Scanner scanner, DGraph graph)
@@ -39,5 +51,4 @@ public class PA11Main
             graph.addEdge(graph.getVertexIfPresent(origin),graph.getVertexIfPresent(destination),weight);
         }
     }
-
 }

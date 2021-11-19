@@ -154,7 +154,7 @@ public class DGraph
         return null;
     }
 
-    private boolean isAdjacent(Vertex v1, Vertex v2)
+    public boolean isAdjacent(Vertex v1, Vertex v2)
     {
         if(v1 == null || v2==null)
             return false;
