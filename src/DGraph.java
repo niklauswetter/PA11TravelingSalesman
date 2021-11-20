@@ -11,6 +11,11 @@ public class DGraph
         this.vertices = new ArrayList<>();
     }
 
+    public List<Integer> getVertices()
+    {
+        return this.vertices;
+    }
+
     public void addVertex(int id)
     {
         if(!this.vertices.contains(id))
@@ -49,10 +54,12 @@ public class DGraph
     }
 
     public double getEdgeWeight(Edge e){return e.weight;}
+
     public double getEdgeWeight(int origin, int destination)
     {
         return this.getEdgeIfPresent(origin,destination).weight;
     }
+
 
     public Set<Integer> getDestinationSet(int vertex)
     {
