@@ -1,242 +1,108 @@
-/**
- * Niklaus Wetter
- * CSC 210
- *
- * This class will provide an implementation of a graph
- * data structure for use with our traveling salesman problem
- *
- */
 import java.util.*;
 
 public class DGraph
 {
-    //Fields
-    /**
-     * This map will store the information about our graph
-     * The Vertex object will simply have a name, while the
-     * Edge object will contain the source and destination
-     * vertices, and the weight.
-     *
-     * For our usage the weight will be the distance between
-     * each vertex in the edge.
-     *
-     * In this map the key will be the origin vertex, and the
-     * value will be a list of all edges with a source of the
-     * key vertex
-     */
-    private Map<Vertex, List<Edge>> adjacentVertices;
-    /**
-     * This map stores all the vertices using their string name
-     * as a key for easy searching
-     */
-    private Map<String, Vertex> vertices;
-    private List<String> vertexNames;
+    private Map<Integer, List<Edge>> edges;
+    private List<Integer> vertices;
 
-    //Methods
-
-    //Default constructor
     public DGraph()
     {
-        this.vertices = new HashMap<>();
-        this.adjacentVertices = new HashMap<>();
-        this.vertexNames = new ArrayList<>();
+        this.edges = new HashMap<>();
+        this.vertices = new ArrayList<>();
     }
 
-    public void addVertex(String label)
+    public void addVertex(int id)
     {
-        this.vertices.putIfAbsent(label, new Vertex(label));
-        this.vertexNames.add(label);
+        if(!this.vertices.contains(id))
+            this.vertices.add(id);
     }
 
-    public void removeVertex(String label)
+    public boolean vertexExists(int id)
     {
-        this.vertices.remove(label);
-        this.vertexNames.remove(label);
+        return this.vertices.contains(id);
     }
 
-    public Vertex getVertexIfPresent(String label)
+    public void addEdge(int v1, int v2, double weight)
     {
-        if(!this.vertices.containsKey(label))
-            return null;
-        return this.vertices.get(label);
-    }
-
-    public void addEdge(Vertex v1, Vertex v2, double weight)
-    {
-        //Exit if either vertex is null
-        if(v1 == null || v2 == null)
+        if(!this.vertexExists(v1) || !this.vertexExists(v2))
             return;
-        //If this is the first edge with this origin
-        if(!this.adjacentVertices.containsKey(v1))
-        {
-            this.adjacentVertices.put(v1, new ArrayList<>());
-        }
-        //Now that the list has been created regardless, we add the edge
-        //TODO: All weights are currently 0, add calculation functionality here
-        this.adjacentVertices.get(v1).add(new Edge(v1,v2,weight));
+        if(!this.edges.containsKey(v1))
+            this.edges.put(v1,new ArrayList<>());
+        this.edges.get(v1).add(new Edge(v1,v2,weight));
     }
 
-    public void removeEdge(Vertex v1, Vertex v2)
+    public Edge getEdgeIfPresent(int origin, int destination)
     {
-        //Exit if either vertex is null
-        if(v1 == null || v2 == null)
-            return;
-        //Exit if the map does not contain any edges originating at this vertex
-        if(!this.adjacentVertices.containsKey(v1))
-            return;
-        //TODO:FINISH
-    }
-
-    /**
-     * Returns a set of all vertices adjacent to the argument
-     * @param v vertex to find all adjacent vertices for
-     * @return a HashSet of Vertex objects; null if v is null,
-     * or has no adjacent Vertex objects
-     */
-    public Set<Vertex> getAdjacentSet(Vertex v)
-    {
-        Set<Vertex> vertexSet = new HashSet<>();
-        if(this.getDestinationSet(v)==null && this.getOriginSet(v)==null)
+        if(!this.vertexExists(origin) || !this.vertexExists(destination))
             return null;
-        if(this.getDestinationSet(v)!=null)
+        for(Edge e: this.edges.get(origin))
         {
-            for(Vertex t:this.getDestinationSet(v))
-                vertexSet.add(t);
+            if(e.destination==destination)
+                return e;
         }
-        if(this.getOriginSet(v)!=null)
-        {
-            for (Vertex t:this.getOriginSet(v))
-                vertexSet.add(t);
-        }
-        return vertexSet;
+        return null;
     }
 
-    /**
-     * Returns a set of all adjacent Vertex objects with v as the vertex
-     * from which that edge came from, essentially returning only possible
-     * destination Vertex objects of v
-     * @param v the vertex for which to return the set
-     * @return A HashSet of Vertex objects; null if v1 is null,
-     * or has no adjacent Vertex objects
-     */
-    public Set<Vertex> getDestinationSet(Vertex v)
+    public List<Edge> getEdgesFromOrigin(int vertex)
     {
-        Set<Vertex> vertexSet = new HashSet<>();
-        if(v==null)
+        return this.edges.get(vertex);
+    }
+
+    public double getEdgeWeight(Edge e){return e.weight;}
+    public double getEdgeWeight(int origin, int destination)
+    {
+        return this.getEdgeIfPresent(origin,destination).weight;
+    }
+
+    public Set<Integer> getDestinationSet(int vertex)
+    {
+        Set<Integer> vertexSet = new LinkedHashSet<>();
+        if(!this.vertexExists(vertex))
             return null;
-        if(this.adjacentVertices.containsKey(v))
+        if(this.edges.containsKey(vertex))
         {
-            for(Edge e:this.adjacentVertices.get(v))
+            for(Edge e:this.edges.get(vertex))
                 vertexSet.add(e.destination);
             return vertexSet;
         }
         return null;
     }
 
-    public Set<Vertex> getOriginSet(Vertex v)
+    public int numVertices()
     {
-        Set<Vertex> vertexSet = new HashSet<>();
-        if(v==null)
-            return null;
-        for(String s:this.vertexNames)
-        {
-            if(this.adjacentVertices.containsKey(s))
-            {
-                Vertex temp = new Vertex(s);
-                for(Edge e:this.adjacentVertices.get(temp))
-                {
-                    if(e.destination.equals(v))
-                        vertexSet.add(e.source);
-                    return vertexSet;
-                }
-            }
-        }
-        return null;
+        return this.vertices.size();
     }
 
-    public boolean isAdjacent(Vertex v1, Vertex v2)
+    public void sortVertexList()
     {
-        if(v1 == null || v2==null)
-            return false;
-        if(!this.vertices.containsValue(v1) || !this.vertices.containsValue(v2))
-            return false;
-        //At this point we know neither are null, and both are in the map
-        if(this.adjacentVertices.containsKey(v1))
-        {
-            //If there is an edge with v1 as it's origin
-            for(Edge e:this.adjacentVertices.get(v1))
-            {
-                if(e.destination.equals(v2))
-                    return true;
-            }
-        }
-        else if(this.adjacentVertices.containsKey(v2))
-        {
-            //If there is an edge with v2 as it's origin
-            for(Edge e:this.adjacentVertices.get(v2))
-            {
-                if(e.destination.equals(v1))
-                    return true;
-            }
-        }
-        //If we reach this point and have not returned we return false
-        return false;
+        Collections.sort(this.vertices);
     }
 
     @Override
     public String toString()
     {
         String temp = "Graph:\n  Vertices:\n";
-        for(Vertex v: this.vertices.values())
-            temp+="    - "+v+"\n";
-        temp+= "  Edges:\n";
-        for(List<Edge> e: this.adjacentVertices.values())
+        for(int i:this.vertices)
+            temp+="    - "+i+"\n";
+        temp+="  Edges:\n";
+        for(List<Edge> e:this.edges.values())
         {
-            for(Edge ee: e)
+            for (Edge ee: e)
                 temp+="    - "+ee+"\n";
         }
         return temp;
     }
 
-    //Inner Classes
-    private class Vertex
-    {
-        String label;
-        public Vertex(String label)
-        {
-            this.label=label;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Vertex vertex = (Vertex) o;
-            return label.equals(vertex.label);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(label);
-        }
-
-        @Override
-        public String toString() {
-            return "Vertex{" +
-                    "label='" + label + '\'' +
-                    '}';
-        }
-    }
-
+    //Internal Classes
     private class Edge
     {
-        private Vertex source;
-        private Vertex destination;
+        private int origin;
+        private int destination;
         private double weight;
 
-        public Edge(Vertex source, Vertex destination, double weight)
+        public Edge(int origin, int destination, double weight)
         {
-            this.source=source;
+            this.origin=origin;
             this.destination=destination;
             this.weight=weight;
         }
@@ -246,18 +112,18 @@ public class DGraph
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Edge edge = (Edge) o;
-            return Double.compare(edge.weight, weight) == 0 && source.equals(edge.source) && destination.equals(edge.destination);
+            return origin == edge.origin && destination == edge.destination && Double.compare(edge.weight, weight) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(source, destination, weight);
+            return Objects.hash(origin, destination, weight);
         }
 
         @Override
         public String toString() {
             return "Edge{" +
-                    "source=" + source +
+                    "origin=" + origin +
                     ", destination=" + destination +
                     ", weight=" + weight +
                     '}';
