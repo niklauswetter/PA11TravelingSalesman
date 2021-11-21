@@ -1,10 +1,12 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class PA11Main
 {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
 	    File file = new File(args[0]);
         Scanner scanner = new Scanner(file);
         DGraph dGraphInt = new DGraph();
@@ -12,10 +14,12 @@ public class PA11Main
         //loadMatrix(scanner,dGraph);
         loadMatrix(scanner,dGraphInt);
 
-        heuristicSalesman(dGraphInt);
+        //THIS ONE WORKS
 
-        //Set this to true before running to view matrix output
-        boolean debugFlag = false;
+        System.out.println("Heuristic: "+heuristicSalesman(dGraphInt));
+        System.out.println("Backtrack: "+backtrackSalesman(dGraphInt));
+        System.out.println("Custom: ");
+        time(dGraphInt);
     }
 
     public static void loadMatrix(Scanner scanner, DGraph graph)
@@ -42,7 +46,7 @@ public class PA11Main
         graph.sortVertexList();
     }
 
-    public static void heuristicSalesman(DGraph graph)
+    public static String heuristicSalesman(DGraph graph)
     {
         List<Integer> vertices = graph.getVertices();
         List<Integer> visitedVertices = new ArrayList<>();
@@ -109,21 +113,99 @@ public class PA11Main
             finalOutput+=", "+finalOrder[i];
         finalOutput+="]";
 
-        System.out.println(finalOutput);
+        return finalOutput;
     }
 
-    public static void backtrackSalesman(DGraph graph)
+    public static String backtrackSalesman(DGraph graph)
     {
+        List<Integer> vertices = graph.getVertices();
+        List<List<Integer>> paths = new ArrayList<>();
+        List<Double> costs = new ArrayList<>();
 
+        permute(graph,vertices,0,paths,costs);
+
+        double minCost = Double.MAX_VALUE;
+        List<Integer> minPath = new ArrayList<>();
+
+        for(int i=0;i<paths.size();i++)
+        {
+            double temp = costs.get(i);
+            if(minCost>temp)
+            {
+                minCost=temp;
+                minPath = new ArrayList<>(paths.get(i));
+            }
+            //System.out.println(paths.get(i)+" cost = "+costs.get(i));
+        }
+        //System.out.println("cost = "+minCost+", visitOrder = "+minPath);
+        return "cost = "+minCost+", visitOrder = "+minPath+"";
     }
 
-    public static void customSalesman(DGraph graph)
+    public static void permute(DGraph graph, List<Integer> vertices, int k, List<List<Integer>> storagePointer, List<Double> costPointer)
     {
-
+        for(int i=k;i<vertices.size();i++)
+        {
+            Collections.swap(vertices,i,k);
+            permute(graph, vertices,k+1,storagePointer,costPointer);
+            Collections.swap(vertices,k,i);
+        }
+        if(vertices.get(0)!=1)
+            return;
+        if(k == vertices.size()-1)
+        {
+            //THESE ARE THE COMPLETE SOLUTIONS
+            double cost = getCostFromVertexList(graph,vertices);
+            List<Integer> copy = new ArrayList<>(vertices);
+            storagePointer.add(copy);
+            costPointer.add(cost);
+            //System.out.println(copy+" cost = "+cost);
+        }
     }
 
-    public static void time()
+    public static double getCostFromVertexList(DGraph graph, List<Integer> vertices)
     {
+        int size = vertices.size();
+        double cost = 0;
+        for(int i=0;i<size;i++)
+        {
+            if(i<size-1)
+                cost+=graph.getEdgeWeight(vertices.get(i),vertices.get(i+1));
 
+            if(i==size-1)
+                cost+=graph.getEdgeWeight(vertices.get(i),vertices.get(0));
+        }
+        return Math.round(cost*10)/10.0;
+    }
+
+    public static String customSalesman(DGraph graph)
+    {
+        return "";
+    }
+
+    public static void time(DGraph graph) throws IOException {
+        double divisor = 0.000001;
+
+        long startH = System.nanoTime();
+        String h = heuristicSalesman(graph);
+        long endH = System.nanoTime();
+        double totalH=(endH-startH)*divisor;
+
+        long startB = System.nanoTime();
+        String b = backtrackSalesman(graph);
+        long endB = System.nanoTime();
+        double totalB=(endB-startB)*divisor;
+
+        long startC = System.nanoTime();
+        String c = customSalesman(graph);
+        long endC = System.nanoTime();
+        double totalC=(endC-startC)*divisor;
+
+        File out = new File("README.md");
+        out.createNewFile();
+        FileWriter writer = new FileWriter("README.md");
+        writer.write("Heuristic: "+h+" time: "+totalH+" ms\n");
+        writer.write("Backtrack: "+b+" time: "+totalB+" ms\n");
+        writer.write("Custom: "+c+" time: "+totalC+" ms\n");
+        writer.close();
     }
 }
