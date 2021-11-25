@@ -8,18 +8,29 @@ public class PA11Main
 {
     public static void main(String[] args) throws IOException {
 	    File file = new File(args[0]);
+        String mode = args[1].toLowerCase();
         Scanner scanner = new Scanner(file);
         DGraph dGraphInt = new DGraph();
 
         //loadMatrix(scanner,dGraph);
         loadMatrix(scanner,dGraphInt);
 
-        //THIS ONE WORKS
-
-        System.out.println("Heuristic: "+heuristicSalesman(dGraphInt));
-        System.out.println("Backtrack: "+backtrackSalesman(dGraphInt));
-        System.out.println("Custom: ");
-        time(dGraphInt);
+        if(mode.equals("heuristic"))
+        {
+            System.out.println(heuristicSalesman(dGraphInt));
+        }
+        else if(mode.equals("backtrack"))
+        {
+            System.out.println(backtrackSalesman(dGraphInt));
+        }
+        else if(mode.equals("mine"))
+        {
+            System.out.println();
+        }
+        else if(mode.equals("time"))
+        {
+            time(dGraphInt);
+        }
     }
 
     public static void loadMatrix(Scanner scanner, DGraph graph)

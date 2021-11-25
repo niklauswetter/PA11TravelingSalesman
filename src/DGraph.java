@@ -1,7 +1,20 @@
+/**
+ * Nick Wetter
+ * CSC210
+ *
+ * This class provides a custom implementation of a weighted directed graph that holds
+ * an integer at each vertex. Vertices are stored as a list, and edges are stored as a map.
+ *
+ * This class also contains the internal Edge class, which is a class representing a connection
+ * between two vertices. The edge class designates a vertex of origin, destination, and the
+ * weight of the edge. This allows for the definition of vertices that have edges between them
+ * with different weights, representing for example, the fuel cost of traveling uphill vs downhill.
+ */
 import java.util.*;
 
 public class DGraph
 {
+    //Fields
     private Map<Integer, List<Edge>> edges;
     private List<Integer> vertices;
 
